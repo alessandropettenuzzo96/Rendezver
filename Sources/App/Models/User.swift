@@ -28,8 +28,12 @@ final class User: MySQLModel, Resource {
     }
     
     
+    func can(_ scopes: Scopes..., on req: Request ) throws -> Future<Void> {
+        try self.can(scopes, on: req);
+    }
     
-    func can(_ scopes: Scopes..., on req: Request) -> Future<Void> {
+    
+    func can(_ scopes: [Scopes], on req: Request) throws -> Future<Void> {
         
         let p = req.eventLoop.newPromise(Void.self);
         
