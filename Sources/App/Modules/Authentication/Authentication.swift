@@ -65,15 +65,15 @@ class Authentication {
                     
                 }
                 
-                return device.user.get(on: req).flatMap { user throws in
+                return device.user.get(on: req).flatMap { user throws -> Future<String> in
                     
                     guard let secret = user.secret else {
                         
-                        throws Abort(.forbidden, reason: "Cannot find secret key");
+                        throw Abort(.forbidden, reason: "Cannot find secret key");
                         
                     }
                     
-                    return promise.succeed(result: secret);
+                    return req.eventLoop.newSucceededFuture(result: secret)
                     
                 }
                 
@@ -81,21 +81,21 @@ class Authentication {
             
         } else if let jwt = try? JWT<CreationPayload>(unverifiedFrom: Data(authToken.utf8)) {
             
-            User.find(jwt.payload.userID, on: req).do { u in
+            secretWrap = User.find(jwt.payload.userID, on: req).flatMap { user throws -> Future<String> in
                 
-                guard let secret = u?.secret else {
+                guard let secret = user?.secret else {
                     
-                    return promise.fail(error: Abort(.forbidden, reason: "Cannot find secret key"));
+                    throw Abort(.forbidden, reason: "Cannot find secret key")
                     
                 }
                 
-                guard u?.role.role == .creation else {
+                guard user?.role == .creation else {
                     
-                    return promise.fail(error: Abort(.forbidden, reason: "Unspecified device"))
+                    throw Abort(.forbidden, reason: "Unspecified device")
                     
                 }
                 
-                return promise.succeed(result: secret);
+                return req.eventLoop.newSucceededFuture(result: secret)
                 
             }
             
@@ -132,7 +132,7 @@ class Authentication {
                 
                     let jwt = try JWT<CreationPayload>(from: authToken, verifiedUsing: JWTSigner.hs512(key: Data(secret.utf8)))
                     
-                    return try User.find(jwt.payload.userID, on: req).flatMap({ user -> Future<User> in
+                    return User.find(jwt.payload.userID, on: req).flatMap({ user throws -> Future<User> in
                         
                         guard let user = user else {
                             
@@ -140,7 +140,7 @@ class Authentication {
                             
                         }
                         
-                        guard user.role.role == .creation else {
+                        guard user.role == .creation else {
                             
                             throw Abort(.forbidden, reason: "Unspecified device")
                             
@@ -175,10 +175,7 @@ class Authentication {
         }
         
         
-        
-        let p = req.eventLoop.newPromise(User.self);
-        
-        return p.futureResult;
+        return scopesVerificationWrap;
         
     }
     
@@ -266,37 +263,13 @@ protocol Executable {}
 
 
 
-
-struct Role: Codable {
-    
-    private static let capabilities: [Roles: [Scopes]] = [:];
-    
-    let role: Roles;
-    
-    var capabilities: [Scopes]? {
-        return Role.capabilities[self.role];
-    }
-    
-    
-    
-    init(_ role: Roles) {
-        
-        self.role = role;
-        
-    }
-    
-}
-
-
-
 enum Roles: String, Codable {
     
-    case creation
+    case creation, addDevice, confirmation, user
     
-    case addDevice
     
-    case confirmation
-    
-    case user
+    var capabilities: [Scopes] {
+        return [];
+    }
     
 }

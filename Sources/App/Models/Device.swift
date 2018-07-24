@@ -38,7 +38,7 @@ extension Device: Content { }
 
 extension Device: Parameter { }
 
-enum DeviceType: String, Codable {
+enum DeviceType: Int, Codable {
     case mobile
     case desktop
 }

@@ -11,7 +11,7 @@ final class User: MySQLModel, Resource {
     var phone: String
     var username: String
     var email: String
-    var role: Role
+    var role: Roles
     
     var secret: String?
     
@@ -19,17 +19,17 @@ final class User: MySQLModel, Resource {
         return children(\.userID);
     }
 
-    init( id: Int? = nil, username: String, phone: String, email: String, role: Role ) {
+    init( id: Int? = nil, username: String, phone: String, email: String ) {
         self.id = id
         self.username = username;
         self.phone = phone;
         self.email = email;
-        self.role = role;
+        self.role = .creation;
     }
     
     
     func can(_ scopes: Scopes..., on req: Request ) throws -> Future<Void> {
-        try self.can(scopes, on: req);
+        return try self.can(scopes, on: req);
     }
     
     

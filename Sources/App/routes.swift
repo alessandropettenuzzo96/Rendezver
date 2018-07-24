@@ -8,6 +8,6 @@ public func routes(_ router: Router) throws {
     }
 
     let authController = AuthenticationController();
-    router.post("auth", use: authController.create);
+    router.post("auth", "user", use: authController.create);
     
 }

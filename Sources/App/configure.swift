@@ -27,6 +27,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 
     /// Configure migrations
     var migrations = MigrationConfig()
+    //migrations.add(migration: CreateUserTable.self, database: .mysql)
     migrations.add(model: User.self, database: .mysql)
     migrations.add(model: Device.self, database: .mysql)
     services.register(migrations)
