@@ -265,11 +265,16 @@ protocol Executable {}
 
 enum Roles: String, Codable {
     
-    case creation, addDevice, confirmation, user
+    case guest, creation, addDevice, confirmation, user
     
     
     var capabilities: [Scopes] {
         return [];
+    }
+    
+    init(from decoder: Decoder) throws {
+        let label = try decoder.singleValueContainer().decode(String.self)
+        self = Roles(rawValue: label) ?? .guest
     }
     
 }
