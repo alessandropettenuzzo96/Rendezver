@@ -16,7 +16,7 @@ class Authentication {
     static func authenticate(_ req: Request, for scopes: Scopes?...) throws -> Future<User>{
         
         
-        guard let authHeader = req.http.headers.firstValue(name: HTTPHeaderName("Authorization") ) else {
+        guard let authHeader = req.http.headers.firstValue(name: HTTPHeaderName("Authorization")) else {
             
             throw Abort(.forbidden, reason: "Missing Authorization header");
             

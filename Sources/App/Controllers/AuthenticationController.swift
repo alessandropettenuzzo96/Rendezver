@@ -110,5 +110,23 @@ final class AuthenticationController {
         
     }
     
+    
+    
+    // Access token management routes
+    
+    func code(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        return try Authentication.authenticate(req, for: .execute(CodeRequest.self)).flatMap { user throws -> Future<HTTPStatus>
+            
+            return try req.content.decode(CodeRequest.self).flatMap { code throws -> Future<HTTPStatus> in
+                
+                return code.send(to: user);
+                
+            }
+            
+        }
+        
+    }
+    
 }
 
