@@ -6,9 +6,6 @@ protocol RNDPayload: JWTPayload {
     
     var exp: ExpirationClaim { get set }
     var iss: IssuerClaim { get set }
-    var nbf: NotBeforeClaim { get set }
-    var aud: AudienceClaim { get set }
-    var sub: SubjectClaim { get set }
     var iat: IssuedAtClaim { get set }
     
 }
@@ -19,24 +16,23 @@ struct CreationPayload: RNDPayload {
     
     var iss: IssuerClaim
     
-    var nbf: NotBeforeClaim
-    
-    var aud: AudienceClaim
-    
-    var sub: SubjectClaim
-    
     var iat: IssuedAtClaim
     
-    
-    var userID: ID
+    var uid: ID
     
     
     func verify() throws {
         try self.exp.verify()
-        try self.nbf.verify()
-        guard self.userID > 0 else {
-            throw JWTError(identifier: "exp", reason: "Invalid User")
+        guard self.uid > 0 else {
+            throw JWTError(identifier: "uid", reason: "Invalid User")
         }
+    }
+    
+    init(_ userID: ID) {
+        self.exp = ExpirationClaim(value: Date(timeIntervalSinceNow: 172800));
+        self.iss = IssuerClaim(value: "RND-SS");
+        self.iat = IssuedAtClaim(value: Date());
+        self.uid = userID;
     }
     
 }
@@ -47,24 +43,24 @@ struct AccessPayload: RNDPayload {
     
     var iss: IssuerClaim
     
-    var nbf: NotBeforeClaim
-    
-    var aud: AudienceClaim
-    
-    var sub: SubjectClaim
-    
     var iat: IssuedAtClaim
     
-    
-    var deviceID: ID
+    var did: ID
     
     
     func verify() throws {
         try self.exp.verify()
-        try self.nbf.verify()
-        guard self.deviceID > 0 else {
-            throw JWTError(identifier: "exp", reason: "Invalid Device")
+        guard self.did > 0 else {
+            throw JWTError(identifier: "did", reason: "Invalid Device")
         }
+    }
+    
+    
+    init(_ deviceID: ID) {
+        self.exp = ExpirationClaim(value: Date(timeIntervalSinceNow: 172800));
+        self.iss = IssuerClaim(value: "RND-SS");
+        self.iat = IssuedAtClaim(value: Date());
+        self.did = deviceID;
     }
     
     

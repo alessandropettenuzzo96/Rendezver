@@ -9,5 +9,5 @@ public func routes(_ router: Router) throws {
 
     let authController = AuthenticationController();
     router.post("auth", "user", use: authController.create);
-    
+    router.post("auth", "device", use: authController.createDevice);
 }

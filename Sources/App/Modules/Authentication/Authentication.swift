@@ -13,7 +13,7 @@ class Authentication {
     
     
     
-    func authenticate(_ req: Request, for scopes: Scopes?...) throws -> Future<User>{
+    static func authenticate(_ req: Request, for scopes: Scopes?...) throws -> Future<User>{
         
         
         guard let authHeader = req.http.headers.firstValue(name: HTTPHeaderName("Authorization") ) else {
@@ -57,7 +57,7 @@ class Authentication {
         
         if let jwt = try? JWT<AccessPayload>(unverifiedFrom: Data(authToken.utf8)) {
             
-            secretWrap = Device.find(jwt.payload.deviceID, on: req).flatMap { device throws -> Future<String> in
+            secretWrap = Device.find(jwt.payload.did, on: req).flatMap { device throws -> Future<String> in
                 
                 guard let device = device else {
                     
@@ -81,7 +81,7 @@ class Authentication {
             
         } else if let jwt = try? JWT<CreationPayload>(unverifiedFrom: Data(authToken.utf8)) {
             
-            secretWrap = User.find(jwt.payload.userID, on: req).flatMap { user throws -> Future<String> in
+            secretWrap = User.find(jwt.payload.uid, on: req).flatMap { user throws -> Future<String> in
                 
                 guard let secret = user?.secret else {
                     
@@ -110,11 +110,9 @@ class Authentication {
         
         let secretVerificationWrap = secretWrap.flatMap { secret throws -> Future<User>  in
             
-            do {
+            if let jwt = try? JWT<AccessPayload>(from: authToken, verifiedUsing: JWTSigner.hs512(key: Data(secret.utf8))) {
                 
-                let jwt = try JWT<AccessPayload>(from: authToken, verifiedUsing: JWTSigner.hs512(key: Data(secret.utf8)))
-                
-                return Device.find(jwt.payload.deviceID, on: req).flatMap({ device throws -> Future<User> in
+                return Device.find(jwt.payload.did, on: req).flatMap({ device throws -> Future<User> in
                     
                     guard let device = device else {
                         
@@ -125,38 +123,33 @@ class Authentication {
                     return device.user.get(on: req);
                     
                 })
-            
-            } catch is JWTError {
-            
-                do {
                 
-                    let jwt = try JWT<CreationPayload>(from: authToken, verifiedUsing: JWTSigner.hs512(key: Data(secret.utf8)))
+            } else if let jwt = try? JWT<CreationPayload>(from: authToken, verifiedUsing: JWTSigner.hs512(key: Data(secret.utf8))) {
+                
+                return User.find(jwt.payload.uid, on: req).flatMap({ user throws -> Future<User> in
                     
-                    return User.find(jwt.payload.userID, on: req).flatMap({ user throws -> Future<User> in
+                    guard let user = user else {
                         
-                        guard let user = user else {
-                            
-                            throw Abort(.forbidden, reason: "Cannot find specified User")
-                            
-                        }
+                        throw Abort(.forbidden, reason: "Cannot find specified User")
                         
-                        guard user.role == .creation else {
-                            
-                            throw Abort(.forbidden, reason: "Unspecified device")
-                            
-                        }
+                    }
+                    
+                    guard user.role == .creation else {
                         
-                        return req.eventLoop.newSucceededFuture(result: user);
+                        throw Abort(.forbidden, reason: "Unspecified device")
                         
-                    });
+                    }
+                    
+                    return req.eventLoop.newSucceededFuture(result: user);
+                    
+                });
                 
-                } catch is JWTError {
+            } else {
                 
-                    throw Abort(.forbidden, reason: "Invalid Token")
-                
-                }
+                throw Abort(.forbidden, reason: "Invalid Token")
                 
             }
+            
             
         }
         
@@ -181,8 +174,60 @@ class Authentication {
     
     
     
+    static func token(for device: Device, on req: Request) throws -> JWT<AccessPayload> {
+        
+        guard let deviceID = device.id else {
+            
+            throw Abort(.forbidden, reason: "Unsaved device");
+            
+        }
+        
+        let jwt = JWT<AccessPayload>(
+            
+            header: JWTHeader(
+                
+                alg: "HS512",
+                
+                typ: "JWT"
+                
+            ),
+            
+            payload: AccessPayload(deviceID)
+            
+        )
+        
+        return jwt;
+        
+    }
+    
+    static func token(for user: User, on req: Request) throws -> JWT<CreationPayload> {
+        
+        guard let userID = user.id else {
+            
+            throw Abort(.forbidden, reason: "Unsaved user");
+            
+        }
+        
+        let jwt = JWT<CreationPayload>(
+            
+            header: JWTHeader(
+                
+                alg: "HS512",
+                
+                typ: "JWT"
+                
+            ),
+            
+            payload: CreationPayload(userID)
+            
+        )
+        
+        return jwt;
+        
+    }
+    
+    
 }
-
 
 
 
@@ -205,7 +250,6 @@ enum AuthenticationType: String {
             return nil;
             
         }
-        
         
         
         return AuthenticationType(rawValue: raw);

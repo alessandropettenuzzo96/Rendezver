@@ -14,11 +14,15 @@ final class AuthenticationController {
     
     /// User management routes
     
-    func create(_ req: Request) throws -> Future<User> {
+    func create(_ req: Request) throws -> Future<CreationToken> {
         
-        return try req.content.decode(User.self).flatMap { user in
+        return try req.content.decode(User.self).flatMap { user throws -> Future<CreationToken> in
             
-            return user.save(on: req)
+            return user.save(on: req).flatMap({ savedUser throws -> Future<CreationToken> in
+                
+                return req.eventLoop.newSucceededFuture(result: try CreationToken(with: savedUser, on: req))
+                
+            });
             
         }
         
@@ -30,7 +34,7 @@ final class AuthenticationController {
         
         return try req.parameters.next(User.self).flatMap { user throws -> Future<HTTPStatus> in
             
-            return try req.make(Authentication.self).authenticate(req, for: .deleteItem(user)).flatMap({ (_) -> Future<HTTPStatus> in
+            return try Authentication.authenticate(req, for: .deleteItem(user)).flatMap({ (_) -> Future<HTTPStatus> in
                 
                 return user.delete(on: req).transform(to: .ok);
                 
@@ -46,7 +50,7 @@ final class AuthenticationController {
         
         return try req.parameters.next(User.self).flatMap({ user throws -> Future<User> in
             
-            return try req.make(Authentication.self).authenticate(req, for: .updateItem(user)).flatMap({ (_) -> Future<User> in
+            return try Authentication.authenticate(req, for: .updateItem(user)).flatMap({ (_) -> Future<User> in
                 
                 return user.update(on: req);
                 
@@ -61,9 +65,10 @@ final class AuthenticationController {
     
     func createDevice(_ req: Request) throws -> Future<Device> {
         
-        return try req.make(Authentication.self).authenticate(req, for: .create(Device.self)).flatMap { user throws -> Future<Device> in
+        return try Authentication.authenticate(req, for: .create(Device.self)).flatMap { user throws -> Future<Device> in
             
             return try req.content.decode(Device.self).flatMap({ device -> Future<Device> in
+                
                 device.userID = user.id!;
                 
                 return device.save(on: req);
@@ -80,7 +85,7 @@ final class AuthenticationController {
         
         return try req.content.decode(Device.self).flatMap({ device -> Future<Device> in
             
-            return try req.make(Authentication.self).authenticate(req, for: .updateItem(device)).flatMap { _ throws -> Future<Device> in
+            return try Authentication.authenticate(req, for: .updateItem(device)).flatMap { _ throws -> Future<Device> in
                 
                 return device.update(on: req);
                 
@@ -95,7 +100,7 @@ final class AuthenticationController {
         
         return try req.content.decode(Device.self).flatMap({ device throws -> Future<HTTPStatus> in
             
-            return try req.make(Authentication.self).authenticate(req, for: .deleteItem(device)).flatMap { _ throws -> Future<HTTPStatus> in
+            return try Authentication.authenticate(req, for: .deleteItem(device)).flatMap { _ throws -> Future<HTTPStatus> in
                 
                 return device.delete(on: req).transform(to: .ok);
                 
@@ -106,3 +111,4 @@ final class AuthenticationController {
     }
     
 }
+

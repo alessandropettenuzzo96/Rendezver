@@ -8,17 +8,17 @@
 import Vapor
 import FluentMySQL
 
-final class Device: MySQLModel, Resource {
+final class Device: MySQLModel, Resource, Authenticable {
     
     var id: ID?
     
-    var userID: ID
+    var userID: ID!
     var name: String
     var type: DeviceType
     var location: Coordinate?
     
     var user: Parent<Device, User> {
-        return parent(\.userID)
+        return parent(\.userID!)
     }
     
     init(id: ID? = nil, userID: ID, name: String, type: DeviceType, location: Coordinate? ) {

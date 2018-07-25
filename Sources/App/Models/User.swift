@@ -1,22 +1,23 @@
 import FluentMySQL
 import Vapor
+import Crypto
 
 typealias ID = Int;
 
 
-final class User: MySQLModel, Resource {
+final class User: MySQLModel, Resource, Authenticable {
 
     var id: ID?
     
     var phone: String
     var username: String
     var email: String
-    var role: Roles
+    var role: Roles!
     
     var secret: String?
     
     var devices: Children<User, Device> {
-        return children(\.userID);
+        return children(\.userID!);
     }
 
     init( id: Int? = nil, username: String, phone: String, email: String ) {
@@ -24,7 +25,13 @@ final class User: MySQLModel, Resource {
         self.username = username;
         self.phone = phone;
         self.email = email;
+    }
+    
+    
+    func willCreate(on conn: MySQLConnection) throws -> EventLoopFuture<User> {
         self.role = .creation;
+        self.secret = try CryptoRandom().generateData(count: 64).base64URLEncodedString();
+        return conn.eventLoop.newSucceededFuture(result: self);
     }
     
     
@@ -38,6 +45,10 @@ final class User: MySQLModel, Resource {
         let p = req.eventLoop.newPromise(Void.self);
         
         let capabilities = self.role.capabilities;
+        
+        
+        // TODO: This is a Mock
+        p.succeed(result: Void());
         
         for scope in scopes {
             
