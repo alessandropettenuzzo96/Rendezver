@@ -8,29 +8,65 @@
 import Vapor
 import Foundation
 
-class CodeRequest: Executable, Content {
+class Code {
     
-    let deviceID: ID
+    let device: Device
+    private let code: String;
     
-    init(deviceID: ID) {
+    init(device: Device, count: UInt8 = 6) {
         
-        self.deviceID = deviceID
+        self.device = device
         
-    }
-    
-    
-    func generate(_ count: Int = 6) -> Future<HTTPStatus> {
-        
-        let code = Int.random(in: 100000...999999);
+        self.code = Code.random(length: count)
         
     }
     
-    func save() -> Future<HTTPStatus> {
+    private func save(on req: Request) -> Future<Void> {
+        self.device.code = self.code;
+        return self.device.update(on: req).transform(to: Void());
+    }
+    
+    func send(to user: User, on req: Request) throws -> Future<HTTPStatus> {
+        return self.save(on: req).flatMap { _ throws -> Future<HTTPStatus> in
+            
+        }
+    }
+    
+    
+    private static func random(length: UInt8) -> String {
+        
+        let letters : NSString = "0123456789"
+        let len = UInt32(letters.length)
+        
+        var randomString = ""
+        
+        for _ in 0 ..< length {
+            let rand = arc4random_uniform(len)
+            var nextChar = letters.character(at: Int(rand))
+            randomString += NSString(characters: &nextChar, length: 1) as String
+        }
+        
+        return randomString
+    }
+    
+    enum Execute: Executable {
+        case request(device: Device)
+    }
+    
+}
+
+
+struct CodeRequest: Content {
+    let deviceID: UInt64;
+    
+    static func `for`(_ device: Device) -> Executable {
+        
+        return Action.requestCode(device);
         
     }
     
-    func send() -> Future<HTTPStatus> {
-        
+    private enum Action: Executable {
+        case requestCode(Device)
     }
     
 }

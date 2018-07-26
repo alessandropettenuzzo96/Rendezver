@@ -116,11 +116,21 @@ final class AuthenticationController {
     
     func code(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try Authentication.authenticate(req, for: .execute(CodeRequest.self)).flatMap { user throws -> Future<HTTPStatus>
+        return try req.content.decode(CodeRequest.self).flatMap { codeRequest throws -> Future<HTTPStatus> in
             
-            return try req.content.decode(CodeRequest.self).flatMap { code throws -> Future<HTTPStatus> in
+            return Device.find(Int(codeRequest.deviceID), on: req).flatMap { device throws -> Future<HTTPStatus> in
                 
-                return code.send(to: user);
+                guard let device = device else {
+                    throw Abort(.badRequest, reason: "Invalid device")
+                }
+                
+                return try Authentication.authenticate(req, for: .executeAction(CodeRequest.for(device))).flatMap { user throws -> Future<HTTPStatus> in
+                    
+                    let code = Code(device: device);
+                    
+                    return try code.send(to: user, on: req);
+                    
+                }
                 
             }
             

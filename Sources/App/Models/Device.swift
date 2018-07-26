@@ -17,6 +17,8 @@ final class Device: MySQLModel, Resource, Authenticable {
     var type: DeviceType
     var location: Coordinate?
     
+    var code: String?
+    
     var user: Parent<Device, User> {
         return parent(\.userID!)
     }
