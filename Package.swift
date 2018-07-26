@@ -11,10 +11,14 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-mysql.git", from: "3.0.0-rc.4"),
         
         // JWT
-        .package(url:"https://github.com/vapor/jwt.git", from: "3.0.0-rc.2")
+        .package(url:"https://github.com/vapor/jwt.git", from: "3.0.0-rc.2"),
+        
+        // SMS GATEWAY : TELESIGN
+        .package(url: "https://github.com/vapor-community/telesign-provider.git", from: "2.0.2")
+        
     ],
     targets: [
-        .target(name: "App", dependencies: ["FluentMySQL", "JWT", "Vapor"]),
+        .target(name: "App", dependencies: ["FluentMySQL", "Telesign", "JWT", "Vapor"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"])
     ]

@@ -7,6 +7,7 @@
 
 import Vapor
 import Foundation
+import Telesign
 
 class Code {
     
@@ -28,7 +29,7 @@ class Code {
     
     func send(to user: User, on req: Request) throws -> Future<HTTPStatus> {
         return self.save(on: req).flatMap { _ throws -> Future<HTTPStatus> in
-            
+            return try req.make(TelesignClient.self).messaging.send(message: "Your device verification code is: "+self.code+".", to: user.phone, messageType: MessageType.ARN).transform(to: .ok);
         }
     }
     
