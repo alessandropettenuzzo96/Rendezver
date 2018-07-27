@@ -19,7 +19,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(middlewares)
 
     // Configure a MySQL database
-    let pgsql = PostgreSQLDatabase(config: PostgreSQLDatabaseConfig(hostname: "localhost", port: 5432, username: "rendezver", database: "rendezvous"));
+    let pgsql = PostgreSQLDatabase(config: PostgreSQLDatabaseConfig(url: "postgres://cznxdfqjimuebm:4c6dfd9b45b6188bb440b8cfee4a88d41d4a81eb9b0c32a52c37556eedf59abe@ec2-54-247-123-231.eu-west-1.compute.amazonaws.com:5432/d2g8l4ic91is2n")!);
     //let mysql = MySQLDatabase(config: MySQLDatabaseConfig(hostname: "localhost", port: 3306, username: "rendezver", password: "7h{A+6hQJCSp/&YvhARx_BTd.y(H]um4", database: "rendezvous"));
     
     /// Register the configured MySQL database to the database config.
