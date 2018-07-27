@@ -42,12 +42,20 @@ class Code {
         var randomString = ""
         
         for _ in 0 ..< length {
-            let rand = arc4random_uniform(len)
-            var nextChar = letters.character(at: Int(rand))
+            let rand = Code.randomInt(min: 0, max: Int(length))
+            var nextChar = letters.character(at: rand)
             randomString += NSString(characters: &nextChar, length: 1) as String
         }
         
         return randomString
+    }
+    
+    public static func randomInt(min: Int, max:Int) -> Int {
+        #if os(Linux)
+        return Glibc.random() % max
+        #else
+        return min + Int(arc4random_uniform(UInt32(max - min + 1)))
+        #endif
     }
     
     enum Execute: Executable {
