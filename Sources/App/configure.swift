@@ -1,11 +1,11 @@
-import FluentMySQL
+import FluentPostgreSQL
 import Vapor
 import Telesign
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     /// Register providers first
-    try services.register(FluentMySQLProvider())
+    try services.register(FluentPostgreSQLProvider())
 
     /// Register routes to the router
     let router = EngineRouter.default()
@@ -19,18 +19,20 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(middlewares)
 
     // Configure a MySQL database
-    let mysql = MySQLDatabase(config: MySQLDatabaseConfig(hostname: "localhost", port: 3306, username: "rendezver", password: "7h{A+6hQJCSp/&YvhARx_BTd.y(H]um4", database: "rendezvous"));
+    let pgsql = PostgreSQLDatabase(config: PostgreSQLDatabaseConfig(hostname: "localhost", port: 5432, username: "rendezver", database: "rendezvous", password: "7h{A+6hQJCSp/&YvhARx_BTd.y(H]um4"));
+    //let mysql = MySQLDatabase(config: MySQLDatabaseConfig(hostname: "localhost", port: 3306, username: "rendezver", password: "7h{A+6hQJCSp/&YvhARx_BTd.y(H]um4", database: "rendezvous"));
     
     /// Register the configured MySQL database to the database config.
     var databases = DatabasesConfig()
-    databases.add(database: mysql, as: .mysql)
+    //databases.add(database: mysql, as: .mysql)
+    databases.add(database: pgsql, as: .psql)
     services.register(databases)
 
     /// Configure migrations
     var migrations = MigrationConfig()
     //migrations.add(migration: CreateUserTable.self, database: .mysql)
-    migrations.add(model: User.self, database: .mysql)
-    migrations.add(model: Device.self, database: .mysql)
+    migrations.add(model: User.self, database: .psql)
+    migrations.add(model: Device.self, database: .psql)
     services.register(migrations)
 
     // Configuring Telesign sms gateway
