@@ -43,8 +43,9 @@ class Code {
         
         for _ in 0 ..< length {
             let rand = Code.randomInt(min: 0, max: Int(length))
-            var nextChar = letters.character(at: rand)
-            randomString += NSString(characters: &nextChar, length: 1) as String
+            let nextChar = letters.character(at: rand)
+            randomString += String(nextChar)
+            //randomString += NSString(characters: &nextChar, length: 1) as String
         }
         
         return randomString
