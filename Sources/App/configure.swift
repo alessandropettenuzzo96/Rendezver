@@ -17,9 +17,12 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
-
+    
+    PrintLogger.init().info("process info: "+ProcessInfo.processInfo.environment.debugDescription)
+    
     // Configure a MySQL database
     let mysql = MySQLDatabase(config: MySQLDatabaseConfig(hostname: "localhost", port: 3306, username: "rendezver", password: "7h{A+6hQJCSp/&YvhARx_BTd.y(H]um4", database: "rendezvous"));
+    
     
     /// Register the configured MySQL database to the database config.
     var databases = DatabasesConfig()
