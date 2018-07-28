@@ -1,6 +1,5 @@
 import FluentPostgreSQL
 import Vapor
-import Telesign
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
@@ -46,9 +45,5 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: User.self, database: .psql)
     migrations.add(model: Device.self, database: .psql)
     services.register(migrations)
-
-    // Configuring Telesign sms gateway
-    services.register(TelesignConfig(apiKey: "M/pCfuL3v4BWsbgPryE/76tBz1zJ3pL7lQTdhWWOXGDnWxPl2JVMh5oHOYpKKEy8MgxSPYdoXLzaFVB7FUIMzA==M/pCfuL3v4BWsbgPryE/76tBz1zJ3pL7lQTdhWWOXGDnWxPl2JVMh5oHOYpKKEy8MgxSPYdoXLzaFVB7FUIMzA==", customerId: "0574CBFC-10E3-4A0F-A7E8-1350E0BEE5CC"))
-    try services.register(TelesignProvider())
     
 }

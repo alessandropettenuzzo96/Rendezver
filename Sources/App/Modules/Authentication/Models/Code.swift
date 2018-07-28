@@ -7,7 +7,6 @@
 
 import Vapor
 import Foundation
-import Telesign
 
 class Code {
     
@@ -29,7 +28,7 @@ class Code {
     
     func send(to user: User, on req: Request) throws -> Future<HTTPStatus> {
         return self.save(on: req).flatMap { _ throws -> Future<HTTPStatus> in
-            return try req.make(TelesignClient.self).messaging.send(message: "Your device verification code is: "+self.code+".", to: user.phone, messageType: MessageType.ARN).transform(to: .ok);
+            return try SMSSender(to: user.phone, with: "Hola, questo è il tuo codice "+self.code+" :)").send(on: req);
         }
     }
     
@@ -42,7 +41,7 @@ class Code {
         var randomString = ""
         
         for _ in 0 ..< length {
-            let rand = Code.randomInt(min: 0, max: Int(length))
+            let rand = Code.randomInt(min: 0, max: Int(len))
             let nextChar = letters.character(at: rand)
             randomString += String(nextChar)
             //randomString += NSString(characters: &nextChar, length: 1) as String
