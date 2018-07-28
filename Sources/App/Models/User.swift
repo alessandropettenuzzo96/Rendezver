@@ -1,11 +1,11 @@
-import FluentPostgreSQL
+import FluentMySQL
 import Vapor
 import Crypto
 
 typealias ID = Int;
 
 
-final class User: PostgreSQLModel, Resource, Authenticable {
+final class User: MySQLModel, Resource, Authenticable {
 
     var id: ID?
     
@@ -28,7 +28,7 @@ final class User: PostgreSQLModel, Resource, Authenticable {
     }
     
     
-    func willCreate(on conn: PostgreSQLConnection) throws -> EventLoopFuture<User> {
+    func willCreate(on conn: MySQLConnection) throws -> EventLoopFuture<User> {
         self.role = .creation;
         self.secret = try CryptoRandom().generateData(count: 64).base64URLEncodedString();
         return conn.eventLoop.newSucceededFuture(result: self);
