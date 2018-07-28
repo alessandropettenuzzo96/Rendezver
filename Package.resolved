@@ -155,15 +155,6 @@
         }
       },
       {
-        "package": "Telesign",
-        "repositoryURL": "https://github.com/vapor-community/telesign-provider.git",
-        "state": {
-          "branch": null,
-          "revision": "1094561e6fc45427106c6bc6a9f8dfa53688b748",
-          "version": "2.0.4"
-        }
-      },
-      {
         "package": "TemplateKit",
         "repositoryURL": "https://github.com/vapor/template-kit.git",
         "state": {
