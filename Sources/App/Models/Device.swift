@@ -6,9 +6,9 @@
 //
 
 import Vapor
-import FluentMySQL
+import FluentPostgreSQL
 
-final class Device: MySQLModel, Resource, Authenticable {
+final class Device: PostgreSQLModel, Resource, Authenticable {
     
     var id: ID?
     
