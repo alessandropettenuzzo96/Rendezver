@@ -35,14 +35,17 @@ class Code {
     
     private static func random(length: UInt8) -> String {
         
-        let letters : NSString = "0123456789"
-        let len = UInt32(letters.length)
+        let letters : String = "0123456789"
+        let len = letters.count
         
         var randomString = ""
         
         for _ in 0 ..< length {
-            let rand = Code.randomInt(min: 0, max: Int(len))
-            let nextChar = letters.character(at: rand)
+            var rand = Code.randomInt(min: 0, max: Int(len))
+            if rand >= letters.count {
+                rand = letters.count - 1;
+            }
+            let nextChar: Character = letters[rand]
             randomString += String(nextChar)
             //randomString += NSString(characters: &nextChar, length: 1) as String
         }

@@ -121,7 +121,9 @@ final class AuthenticationController {
             return Device.find(Int(codeRequest.deviceID), on: req).flatMap { device throws -> Future<HTTPStatus> in
                 
                 guard let device = device else {
+                    
                     throw Abort(.badRequest, reason: "Invalid device")
+                    
                 }
                 
                 return try Authentication.authenticate(req, for: .executeAction(CodeRequest.for(device))).flatMap { user throws -> Future<HTTPStatus> in

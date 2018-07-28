@@ -23,9 +23,14 @@ class SMSSender {
     }
     
     func send(on req: Request) throws -> Future<HTTPStatus> {
-        return HTTPClient.connect(hostname: "https://rest.nexmo.com", on: req).flatMap({ client throws -> Future<HTTPStatus> in
+        
+        return HTTPClient.connect(scheme: HTTPScheme.https, hostname: "rest.nexmo.com", on: req).flatMap({ client throws -> Future<HTTPStatus> in
             
-            let request = HTTPRequest(method: .POST, url: "/sms/json", headers: HTTPHeaders.init([("Content-type", "application/x-www-form-urlencoded")]), body: HTTPBody(string: "api_key="+SMSSender.api_key+"&api_secret="+SMSSender.api_secret+"&to="+self.dest+"&from="+SMSSender.from+"&text="+self.message))
+            var message = "api_key="+SMSSender.api_key+"&api_secret="+SMSSender.api_secret+"&to=39"+self.dest+"&from="+SMSSender.from+"&text="+self.message;
+            
+            message = message.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed)!;
+            
+            let request = HTTPRequest(method: .POST, url: "/sms/json", headers: HTTPHeaders.init([("Content-type", "application/x-www-form-urlencoded")]), body: HTTPBody(string: message))
             
             return client.send(request).flatMap { res throws -> Future<HTTPStatus> in
                 
