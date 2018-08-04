@@ -18,6 +18,9 @@ final class Device: PostgreSQLModel, Resource, Authenticable {
     var location: Coordinate?
     
     var code: String?
+    var codeIssuedAt: Date?
+    
+    var verified: Bool? = false;
     
     var user: Parent<Device, User> {
         return parent(\.userID!)
@@ -29,6 +32,14 @@ final class Device: PostgreSQLModel, Resource, Authenticable {
         self.name = name;
         self.type = type;
         self.location = location;
+    }
+    
+    func willCreate(on conn: PostgreSQLConnection) throws -> Future<Device> {
+        
+        self.verified = false;
+        
+        return conn.eventLoop.newSucceededFuture(result: self);
+        
     }
     
 }

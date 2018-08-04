@@ -28,7 +28,7 @@ final class User: PostgreSQLModel, Resource, Authenticable {
     }
     
     
-    func willCreate(on conn: PostgreSQLConnection) throws -> EventLoopFuture<User> {
+    func willCreate(on conn: PostgreSQLConnection) throws -> Future<User> {
         self.role = .creation;
         self.secret = try CryptoRandom().generateData(count: 64).base64URLEncodedString();
         return conn.eventLoop.newSucceededFuture(result: self);

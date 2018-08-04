@@ -2,15 +2,6 @@ import Vapor
 
 final class AuthenticationController {
     
-    /// Returns a list of all `Todo`s.
-    
-    func index(_ req: Request) throws -> Future<[User]> {
-        
-        return User.query(on: req).all()
-        
-    }
-    
-    
     
     /// User management routes
     
@@ -135,6 +126,25 @@ final class AuthenticationController {
                 }
                 
             }
+            
+        }
+        
+    }
+    
+    
+    func verify(_ req: Request) throws -> Future<AccessToken> {
+        
+        return try req.content.decode(CodeVerifier.self).flatMap { codeVerifier throws -> Future<AccessToken> in
+            
+            return try codeVerifier.device(on: req).flatMap({ device throws -> Future<AccessToken> in
+                
+                return try Authentication.authenticate(req, for: .executeAction(CodeVerifier.for(device))).flatMap { user throws -> Future<AccessToken> in
+                    
+                    return try codeVerifier.verify(on: req).transform(to: try AccessToken(with: device, and: user, on: req))
+                    
+                }
+                
+            })
             
         }
         
